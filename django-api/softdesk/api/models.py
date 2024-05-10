@@ -2,22 +2,32 @@ from django.db import models
 from datetime import date
 
 # Create your models here.
+
+    # TYPE_CHOICES = [
+    #     ('back-end', 'Back-end'),
+    #     ('front-end', 'Front-end'),
+    #     ('IOS', 'iOS'),
+    #     ('Android', 'Android'),
+    # ]
+    # choices=TYPE_CHOICES
+
 class Projects(models.Model):
     class ProjectType(models.TextChoices):
-        BACK_END = 'back-end'
-        FRONT_END = 'front-end'
+        BACK_END = 'Back-End'
+        FRONT_END = 'Front-End'
         IOS = 'iOS'
         ANDROID = 'Android'
-        
+
     author_id = models.ForeignKey("authentication.User", on_delete=models.CASCADE, related_name='project_author')
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     description = models.TextField(default=None)
-    project_type = models.CharField(max_length=9, choices=ProjectType.choices)
+    project_type = models.CharField(max_length=9, choices=ProjectType.choices) #ProjectType.choices
     created_time = models.DateTimeField(auto_now_add=True)
+    contributors = models.ManyToManyField("authentication.User", through='Contributors')
     
 class Contributors(models.Model):
     user_id = models.ForeignKey("authentication.User", on_delete=models.CASCADE)
-    projects_id = models.ForeignKey("api.Projects", on_delete=models.CASCADE)
+    projects_id = models.ForeignKey("api.Projects", on_delete=models.CASCADE, related_name='project')
     
 class Issues(models.Model):
     class Priority(models.TextChoices):

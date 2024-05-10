@@ -19,9 +19,12 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from authentication.views import UserViewSet
+from api.views import ProjectViewSet, IssueViewSet
 
 router = routers.SimpleRouter()
 router.register('signup', UserViewSet, basename='signup')
+router.register('project', ProjectViewSet, basename='project')
+router.register('issue', IssueViewSet, basename='issue')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
