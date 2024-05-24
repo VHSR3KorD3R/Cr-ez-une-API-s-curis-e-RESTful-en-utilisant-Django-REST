@@ -4,7 +4,8 @@ from api.models import Projects, Contributors, Issues, Comments
 
 # Register your models here.
 class ProjectsAdmin(admin.ModelAdmin):
-    list_display = ('author_id', 'name')
+    #list_display = ('author_id', 'name')
+    pass
 
 class ContributorsAdmin(admin.ModelAdmin):
     pass

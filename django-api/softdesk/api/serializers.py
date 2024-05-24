@@ -5,14 +5,8 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
     project_author = serializers.CharField(source='author_id.username', read_only=True)
     class Meta:
         model = Projects
-        fields = "__all__"
-
-class ProjectListSerializer(serializers.ModelSerializer):
-    project_author = serializers.CharField(source='author_id.username', read_only=True)
-    class Meta:
-        model = Projects
-        fields = ["id", "name", "description", "project_type", "created_time", "project_author", "contributors"]
-        
+        fields = ["project_author", "name", "description", "project_type", "created_time", "contributors"]
+    
     def create(self, validated_data):
         current_user = self.context.get('request').user
         validated_data['author_id'] = current_user
@@ -22,6 +16,23 @@ class ProjectListSerializer(serializers.ModelSerializer):
             projects_id = project
         )
         return project
+    
+    def partial_update(self, validated_data):
+        project = self.get_object()
+        Contributors.objects.create(
+            user_id = validated_data['contributors'],
+            projects_id = project
+        )
+        project.contributors = validated_data['contributors']
+        serializer = ProjectDetailSerializer(project, partial=True)
+        return serializer
+        
+
+class ProjectListSerializer(serializers.ModelSerializer):
+    project_author = serializers.CharField(source='author_id.username', read_only=True)
+    class Meta:
+        model = Projects
+        fields = ["name", "description", "project_type", "created_time", "project_author"]
         
     def validate_name(self, value):
         if Projects.objects.filter(name=value).exists():
@@ -29,23 +40,26 @@ class ProjectListSerializer(serializers.ModelSerializer):
         return value
     
 class IssueDetailSerializer(serializers.ModelSerializer):
-    issue_author = serializers.CharField(source='author_id.username', read_only=True)
-    class Meta:
-        model = Issues
-        fields = "__all__"
-
-class IssueListSerializer(serializers.ModelSerializer):
-    issue_author = serializers.CharField(source='author_id.username', read_only=True)
+    issue_author_name = serializers.CharField(source='author_id.username', read_only=True)
     project_name = serializers.CharField(source='project_id.name', read_only=True)
     class Meta:
         model = Issues
-        fields = ["name", "assignment_id", "project_name", "issue_author"]
-        
+        fields = ["project_name", "issue_author_name", "name", "description", "priority", "issue_type", "progress", "assignment_id", "project_id"]
+    
     def create(self, validated_data):
+        print("create issue")
+        print(validated_data)
         current_user = self.context.get('request').user
         validated_data['author_id'] = current_user
         issue = super().create(validated_data)
         return issue
+
+class IssueListSerializer(serializers.ModelSerializer):
+    issue_author_name = serializers.CharField(source='author_id.username', read_only=True)
+    project_name = serializers.CharField(source='project_id.name', read_only=True)
+    class Meta:
+        model = Issues
+        fields = ["project_name", "name", "priority", "issue_type", "progress", "assignment_id", "issue_author_name"]
     
     def validate_name(self, value):
         if Projects.objects.filter(name=value).exists():
