@@ -2,7 +2,8 @@ from django.shortcuts import render
 from api.models import Projects, Issues
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from api.serializers import ProjectDetailSerializer, ProjectListSerializer, IssueDetailSerializer, IssueListSerializer
+from api.serializers import ProjectDetailSerializer, ProjectListSerializer, IssueDetailSerializer, IssueListSerializer, ContributorSerializer
+from api.models import Contributors
 from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import IsAuthor, IsContributor
 
@@ -42,7 +43,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
         project = self.get_object()
         self.perform_destroy(project)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
     
 class IssueViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated(), IsAuthor]
@@ -69,4 +69,16 @@ class IssueViewSet(viewsets.ModelViewSet):
             self.permission_classes = [IsAuthenticated(), IsAuthor]
             return [IsAuthenticated(), IsAuthor]
         #return super(self.__class__, self).get_permissions()
+        return [IsAuthenticated()]
+    
+class ContributorViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated(), IsAuthor]
+    serializer_class = ContributorSerializer
+    
+    def get_permissions(self):
+        if self.action in ['create']:
+            self.permission_classes = [IsAuthenticated(), IsAuthor]
+        if self.action in ['destroy', 'update', 'partial_update']:
+            self.permission_classes = [IsAuthenticated(), IsAuthor]
+            return [IsAuthenticated(), IsAuthor]
         return [IsAuthenticated()]

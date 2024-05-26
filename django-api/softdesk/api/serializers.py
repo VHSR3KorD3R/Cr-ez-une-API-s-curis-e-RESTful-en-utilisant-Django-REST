@@ -18,7 +18,9 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         return project
     
     def partial_update(self, validated_data):
+        print("test")
         project = self.get_object()
+        print("test")
         Contributors.objects.create(
             user_id = validated_data['contributors'],
             projects_id = project
@@ -38,6 +40,18 @@ class ProjectListSerializer(serializers.ModelSerializer):
         if Projects.objects.filter(name=value).exists():
             raise serializers.ValidationError('Project name already exists')
         return value
+
+class ContributorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contributors
+        fields = "__all__"
+    
+    def create(self, validated_data):
+        contributor = Contributors.objects.create(
+            user_id = validated_data['user_id'],
+            projects_id = validated_data['projects_id']
+        )
+        return contributor
     
 class IssueDetailSerializer(serializers.ModelSerializer):
     issue_author_name = serializers.CharField(source='author_id.username', read_only=True)
