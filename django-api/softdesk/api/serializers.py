@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Projects, Contributors, Issues
+from api.models import Projects, Contributors, Issues, Comments
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
     project_author = serializers.CharField(source='author_id.username', read_only=True)
@@ -83,4 +83,29 @@ class IssueListSerializer(serializers.ModelSerializer):
     def validate_project_id(self, value):
         if not Projects.objects.filter(name=value).exits():
             raise serializers.ValidationError('Project does not exist')
+        return value
+    
+class CommentDetailSerializer(serializers.ModelSerializer):
+    comment_author_name = serializers.CharField(source='author_id.username', read_only=True)
+    class Meta:
+        model = Comments
+        fields = ["comment_author_name", "description", "issue_id", "created_time"]
+    
+    def create(self, validated_data):
+        print("create comment")
+        print(validated_data)
+        current_user = self.context.get('request').user
+        validated_data['author_id'] = current_user
+        comment = super().create(validated_data)
+        return comment
+
+class CommentListSerializer(serializers.ModelSerializer):
+    comment_author_name = serializers.CharField(source='author_id.username', read_only=True)
+    class Meta:
+        model = Comments
+        fields = ["issue_id", "comment_author_name", "description"]
+    
+    def validate_issue_id(self, value):
+        if not Issues.objects.filter(name=value).exits():
+            raise serializers.ValidationError('Issue does not exist')
         return value
