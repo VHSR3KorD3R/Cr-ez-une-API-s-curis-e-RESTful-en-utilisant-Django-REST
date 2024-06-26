@@ -1,20 +1,9 @@
-from django.shortcuts import render
 from api.models import Projects, Issues, Comments
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from api.serializers import ProjectDetailSerializer, ProjectListSerializer, IssueDetailSerializer, IssueListSerializer, ContributorSerializer, CommentDetailSerializer, CommentListSerializer
-from api.models import Contributors
 from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import IsAuthor, IsContributor
-
-# class d:
-    
-#     detail_serializer_class = None
-    
-#     def get_serializer_class(self):
-#         if self.action == 'delete' and self.detail_serializer_class is not None:
-#             return self.detail_serializer_class
-#         return super().get_seriliazer_class()
 
 class ProjectViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated(), IsAuthor()]
@@ -64,12 +53,13 @@ class IssueViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.action in ['create']:
-            self.permission_classes = [IsAuthenticated(), IsContributor()]
+            print("check issue permission")
+            self.permission_classes = [IsContributor(), IsAuthenticated()]
+            return [IsContributor(), IsAuthenticated()]
         if self.action in ['destroy', 'update', 'partial_update']:
             self.permission_classes = [IsAuthenticated(), IsAuthor()]
             return [IsAuthenticated(), IsAuthor()]
         #return super(self.__class__, self).get_permissions()
-        return [IsAuthenticated()]
     
 class ContributorViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated(), IsAuthor()]
@@ -105,5 +95,3 @@ class CommentViewSet(viewsets.ModelViewSet):
         if self.action in ['destroy', 'update', 'partial_update']:
             self.permission_classes = [IsAuthenticated(), IsAuthor(), IsContributor()]
             return [IsAuthenticated(), IsAuthor(), IsContributor()]
-        #return super(self.__class__, self).get_permissions()
-        return [IsAuthenticated()]

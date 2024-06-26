@@ -47,10 +47,13 @@ class ContributorSerializer(serializers.ModelSerializer):
         fields = "__all__"
     
     def create(self, validated_data):
-        contributor = Contributors.objects.create(
-            user_id = validated_data['user_id'],
-            projects_id = validated_data['projects_id']
-        )
+        user_projects = Contributors.objects.filter(user_id=validated_data["user_id"], projects_id=validated_data['projects_id'])
+        contributor = None
+        if not user_projects:
+            contributor = Contributors.objects.create(
+                user_id = validated_data['user_id'],
+                projects_id = validated_data['projects_id']
+            )
         return contributor
     
 class IssueDetailSerializer(serializers.ModelSerializer):
@@ -61,8 +64,6 @@ class IssueDetailSerializer(serializers.ModelSerializer):
         fields = ["project_name", "issue_author_name", "name", "description", "priority", "issue_type", "progress", "assignment_id", "project_id"]
     
     def create(self, validated_data):
-        print("create issue")
-        print(validated_data)
         current_user = self.context.get('request').user
         validated_data['author_id'] = current_user
         issue = super().create(validated_data)
