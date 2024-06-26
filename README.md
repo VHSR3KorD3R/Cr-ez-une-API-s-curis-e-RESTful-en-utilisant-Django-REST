@@ -18,3 +18,13 @@ Enfin lancer le serveur en se rendant dans le répertoire softdesk et lancer
 
 ```python manage.py runserver```
 
+Url pour accéder au serveur
+
+```http://localhost:8000/```
+
+Mot de passe admin:
+
+```
+user: admin
+password: admin
+```
