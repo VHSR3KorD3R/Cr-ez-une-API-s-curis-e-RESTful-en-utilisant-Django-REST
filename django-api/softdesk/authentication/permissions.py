@@ -11,6 +11,8 @@ class IsAuthor(permissions.BasePermission):
                 return True
             else:
                 return False
+        return super().has_permission(request, view)
+            
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
