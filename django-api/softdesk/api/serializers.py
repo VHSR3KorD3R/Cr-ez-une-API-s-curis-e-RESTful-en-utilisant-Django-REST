@@ -18,9 +18,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         return project
     
     def partial_update(self, validated_data):
-        print("test")
         project = self.get_object()
-        print("test")
         Contributors.objects.create(
             user_id = validated_data['contributors'],
             projects_id = project
@@ -45,15 +43,21 @@ class ContributorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contributors
         fields = "__all__"
+        
+    def validate(self, value):
+        user_id = value.get('user_id')
+        projects_id = value.get('projects_id')
+        if Contributors.objects.filter(user_id=user_id, projects_id=projects_id).exists():
+            raise serializers.ValidationError('Contributor already exists')
+        return value
     
     def create(self, validated_data):
         user_projects = Contributors.objects.filter(user_id=validated_data["user_id"], projects_id=validated_data['projects_id'])
-        contributor = None
         if not user_projects:
             contributor = Contributors.objects.create(
-                user_id = validated_data['user_id'],
-                projects_id = validated_data['projects_id']
-            )
+                    user_id = validated_data['user_id'],
+                    projects_id = validated_data['projects_id']
+                )
         return contributor
     
 class IssueDetailSerializer(serializers.ModelSerializer):
@@ -93,8 +97,6 @@ class CommentDetailSerializer(serializers.ModelSerializer):
         fields = ["comment_author_name", "description", "issue_id", "created_time"]
     
     def create(self, validated_data):
-        print("create comment")
-        print(validated_data)
         current_user = self.context.get('request').user
         validated_data['author_id'] = current_user
         comment = super().create(validated_data)

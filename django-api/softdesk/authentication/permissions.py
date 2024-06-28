@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from api.models import Projects, Issues
+from api.models import Projects, Issues, Contributors
 from django.shortcuts import get_object_or_404
 
 class IsAuthor(permissions.BasePermission):
@@ -12,7 +12,6 @@ class IsContributor(permissions.BasePermission):
     def has_permission(self, request, view):
         #current_user = self.context.get('request').user
         project = None
-        print("test")
         if 'project_id' in request.data:
             queryset = Projects.objects.all()
             project = get_object_or_404(queryset, pk=request.data['project_id'])
@@ -22,4 +21,9 @@ class IsContributor(permissions.BasePermission):
             project = issue.project_id
         if project is not None and request.user in project.contributors.all():
             return True
+        if 'projects_id' in request.data:
+            queryset = Contributors.objects.filter(projects_id=request.data['projects_id'])
+            user_list = queryset.values_list('user_id',flat=True)
+            if request.user.id in user_list:
+                return True
         return False

@@ -44,7 +44,6 @@ class IssueViewSet(viewsets.ModelViewSet):
             queryset = Issues.objects.filter(project_id=project_id)
             return queryset
         return Issues.objects.all()
-        # return Issues.objects.filter(project_id=self.kwargs["project_id"])
     
     def get_serializer_class(self):
         if self.action in ['retrieve', 'update', 'partial_update', 'create']:
@@ -53,12 +52,12 @@ class IssueViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.action in ['create']:
-            print("check issue permission")
-            self.permission_classes = [IsContributor(), IsAuthenticated()]
-            return [IsContributor(), IsAuthenticated()]
+            self.permission_classes = [IsAuthenticated(), IsContributor()]
+            return [IsAuthenticated(), IsContributor()]
         if self.action in ['destroy', 'update', 'partial_update']:
             self.permission_classes = [IsAuthenticated(), IsAuthor()]
             return [IsAuthenticated(), IsAuthor()]
+        return [IsAuthenticated()]
         #return super(self.__class__, self).get_permissions()
     
 class ContributorViewSet(viewsets.ModelViewSet):
@@ -67,8 +66,8 @@ class ContributorViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.action in ['destroy', 'update', 'partial_update', 'create']:
-            self.permission_classes = [IsAuthenticated(), IsContributor()]
-            return [IsAuthenticated(), IsContributor()]
+            self.permission_classes = [IsAuthenticated(), IsAuthor()]
+            return [IsAuthenticated(), IsAuthor()]
         return [IsAuthenticated()]
     
 class CommentViewSet(viewsets.ModelViewSet):
@@ -93,5 +92,6 @@ class CommentViewSet(viewsets.ModelViewSet):
             self.permission_classes = [IsAuthenticated(), IsContributor()]
             return [IsAuthenticated(),IsContributor()]
         if self.action in ['destroy', 'update', 'partial_update']:
-            self.permission_classes = [IsAuthenticated(), IsAuthor(), IsContributor()]
-            return [IsAuthenticated(), IsAuthor(), IsContributor()]
+            self.permission_classes = [IsAuthenticated(), IsAuthor()]
+            return [IsAuthenticated(), IsAuthor()]
+        return [IsAuthenticated()]
