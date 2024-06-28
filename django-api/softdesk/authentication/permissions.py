@@ -3,6 +3,14 @@ from api.models import Projects, Issues, Contributors
 from django.shortcuts import get_object_or_404
 
 class IsAuthor(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if 'projects_id' in request.data:
+            queryset = Contributors.objects.filter(projects_id=request.data['projects_id'])
+            user_list = queryset.values_list('user_id',flat=True)
+            if request.user.id in user_list:
+                return True
+            else:
+                return False
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -21,9 +29,4 @@ class IsContributor(permissions.BasePermission):
             project = issue.project_id
         if project is not None and request.user in project.contributors.all():
             return True
-        if 'projects_id' in request.data:
-            queryset = Contributors.objects.filter(projects_id=request.data['projects_id'])
-            user_list = queryset.values_list('user_id',flat=True)
-            if request.user.id in user_list:
-                return True
         return False
